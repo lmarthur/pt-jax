@@ -4,7 +4,8 @@ version = "0.1.0"
 description = "Minimal implementation of parallel tempering in JAX."
 readme = "README.md"
 authors = [
-    { name = "Paweł Czyż", email = "pczyz@protonmail.com" }
+    { name = "Paweł Czyż", email = "pczyz@protonmail.com" },
+    { name = "Lucas Arthur", email = "lmarthur@mit.edu" },
 ]
 requires-python = ">=3.10"
 dependencies = [

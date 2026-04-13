@@ -1,9 +1,9 @@
-"""Demo: DEO (non-reversible) parallel tempering for sampling from
+"""Demo: SEO (reversible) parallel tempering for sampling from
 a two-dimensional distribution employing the MALA kernel from BlackJAX.
 
-DEO uses a deterministic even-odd parity schedule, which is non-reversible
-and achieves a round-trip rate independent of the number of chains.
-See demo_seo.py for the reversible SEO variant."""
+SEO uses a stochastic even-odd parity schedule, which is reversible.
+Its round-trip rate degrades with the number of chains; it is included
+for comparison against the non-reversible DEO variant in demo.py."""
 try:
     import matplotlib.pyplot as plt
     import numpyro.distributions as dist
@@ -51,7 +51,6 @@ def mala_kernel_generator(log_p, step_size):
 
 
 def sampling_fn(key, betas, x0, n_samples: int = 5000, warmup: int = 1000):
-    # We know how to sample from the reference distribution
     n_chains = len(betas)
     step_sizes = jnp.linspace(0.5, 0.01, n_chains)
 
@@ -62,18 +61,18 @@ def sampling_fn(key, betas, x0, n_samples: int = 5000, warmup: int = 1000):
         kernel_generator=mala_kernel_generator,
         params=step_sizes,
     )
-    K_deo = pt_jax.swap.generate_deo_extended_kernel(
+    K_seo = pt_jax.swap.generate_seo_extended_kernel(
         log_prob=log_target,
         log_ref=log_ref,
         annealing_schedule=betas,
     )
 
     key, subkey = jrandom.split(key)
-    samples, rejection_rates = pt_jax.swap.deo_sampling_loop(
+    samples, rejection_rates = pt_jax.swap.seo_sampling_loop(
         key=subkey,
         x0=jnp.zeros([n_chains] + list(x0.shape)),
         kernel_local=K_ind,
-        kernel_deo=K_deo,
+        kernel_seo=K_seo,
         n_samples=n_samples,
         warmup=warmup,
     )
@@ -95,7 +94,7 @@ def main():
 
     samples, mean_rejection_rates = sampling_fn(key, betas, x0)
 
-    print("Mean per-pair rejection rates (DEO):")
+    print("Mean per-pair rejection rates (SEO):")
     for i, r in enumerate(mean_rejection_rates):
         print(f"  chain {i} <-> {i+1}  (beta {betas[i]:.3f} <-> {betas[i+1]:.3f}): {r:.3f}")
 
@@ -123,7 +122,7 @@ def main():
         ax.set_aspect("equal")
 
     fig.tight_layout()
-    fig.savefig("plot.jpg")
+    fig.savefig("plot_seo.jpg")
 
 
 if __name__ == "__main__":

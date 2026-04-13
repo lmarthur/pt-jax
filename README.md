@@ -13,14 +13,19 @@ Parallel tempering is a Markov chain Monte Carlo scheme, designed to sample from
 ## Installation
 
 ```bash
-$ pip install "git+https://github.com/pawel-czyz/pt-jax.git"
+$ git clone https://github.com/lmarthur/pt-jax.git
+$ cd pt-jax
+$ pip install -e .
 ```
-
-(As this implementation is supposed to be temporary, it will not be uploaded to PyPI.) 
 
 ## Usage
 
-See `examples/demo.py` for an example how to use this package together with the MALA sampler from BlackJAX together with non-reversible parallel tempering described in [S. Syed et al., *Non-Reversible Parallel Tempering: a Scalable Highly Parallel MCMC Scheme* (2019)](https://arxiv.org/abs/1905.02939).
+This package implements two even-odd swap schemes for parallel tempering, both using Metropolis-Hastings acceptance for swap proposals:
+
+- **DEO (Deterministic Even-Odd)**: non-reversible. Parity alternates deterministically with the timestep. Achieves a round-trip rate independent of the number of chains. Described in [S. Syed et al., *Non-Reversible Parallel Tempering: a Scalable Highly Parallel MCMC Scheme* (2019)](https://arxiv.org/abs/1905.02939).
+- **SEO (Stochastic Even-Odd)**: reversible. Parity is drawn randomly at each step. Round-trip rate degrades with the number of chains; included for comparison.
+
+See `examples/demo.py` for DEO and `examples/demo_seo.py` for SEO, both using the MALA sampler from BlackJAX. The `pt_jax.annealing` module provides schedule utilities including `annealing_optimal`, which tunes the temperature ladder from empirical rejection rates collected during a pilot run.
 
 ## Alternatives
 

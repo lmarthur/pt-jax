@@ -52,14 +52,14 @@ def sampling_fn(key, wrapped, betas, x0, n_samples: int = 10_000, warmup: int = 
         kernel_generator=mala_kernel_generator,
         truncated_params=step_sizes[1:],
     )
-    K_deo = pt_jax.deo.generate_deo_extended_kernel(
+    K_deo = pt_jax.swap.generate_deo_extended_kernel(
         log_prob=log_target,
         log_ref=log_ref,
         annealing_schedule=betas,
     )
 
     key, subkey = jax.random.split(key)
-    samples, _ = pt_jax.deo.deo_sampling_loop(
+    samples, _ = pt_jax.swap.deo_sampling_loop(
         key=subkey,
         x0=jnp.zeros([n_chains] + list(x0.shape)),
         kernel_local=K_ind,
